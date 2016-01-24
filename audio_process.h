@@ -10,7 +10,7 @@
 #define AUDIO_PROCESS_FFTS_PER_SEC DIV_ROUND(10, 1000)
 
 
-void audio_process_add_samples(size_t nbr_samples, int16_t *buf);
+void audio_process_add_samples(size_t nbr_samples, int16_t *data_left, int16_t *data_right);
 void audio_process_start();
 
 #endif//AUDIO_PROCESS_H

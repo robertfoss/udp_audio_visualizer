@@ -107,15 +107,33 @@ static void stream_read_cb(pa_stream *stream, size_t nbr_bytes, void *data) {
 //        mainloop_api->io_enable(stdio_event, PA_IO_EVENT_OUTPUT);
 //    }
 
-    const void *buf;
+   const void *buf;
     if (pa_stream_peek(stream, &buf, &nbr_bytes) < 0) {
         DIE("pa_stream_peek() failed");
+    }
+
+    uint8_t *data_left = malloc(DIV_ROUND(nbr_bytes, 2));
+    uint8_t *ptr_data_left = data_left;
+
+    uint8_t *data_right = malloc(DIV_ROUND(nbr_bytes, 2));
+    uint8_t *ptr_data_right = data_right;
+
+    uint8_t ch_left = PA_CHANNEL_POSITION_LEFT - 1;
+    uint8_t ch_right = PA_CHANNEL_POSITION_RIGHT - 1;
+    UNUSED(ch_right);
+
+    for(int i = 0; i < nbr_bytes; i++) {
+        if (!(i & ch_left)) {
+            *ptr_data_left++ = ((uint8_t *)buf)[i];
+        } else {
+            *ptr_data_right++ = ((uint8_t *)buf)[i];
+        }
     }
 
     ASSERT(stream);
     ASSERT(nbr_bytes > 0);
 
-    audio_process_add_samples(nbr_bytes / AUDIO_PULSEAUDIO_BYTES_PER_SAMPLE, data);
+    audio_process_add_samples(nbr_bytes / AUDIO_PULSEAUDIO_BYTES_PER_SAMPLE, (int16_t *) data_left, (int16_t *) data_right);
 
     // Pop that data that we peeked
     pa_stream_drop(stream);

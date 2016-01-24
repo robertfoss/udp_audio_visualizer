@@ -12,7 +12,7 @@ static void *audio_process_thread(void *args)
 }
 
 
-void audio_process_add_samples(size_t nbr_samples, int16_t *buf)
+void audio_process_add_samples(size_t nbr_samples, int16_t *left_data, int16_t *right_data)
 {
 
 }
