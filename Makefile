@@ -30,8 +30,10 @@ asan: LDFLAGS+=-fsanitize=address
 
 clean:
 	-rm -f $(OBJ) $(NAME)
-	-find . -name '*~' -delete
-	-find . -name '*.swp' -delete
+	-find . -name '*~' -exec rm -v "{}" \;
+	-find . -name '*.swp' -exec rm -v "{}" \;
+	-find . -name '*.out.*' -exec rm -v "{}" \;
+	-find . -name "*.orig" -exec rm -v "{}" \;
 
 format:
 	-find -regex ".*\.\(c\|h\)" -exec \
@@ -39,4 +41,3 @@ format:
 		--indent-labels --pad-oper --unpad-paren --pad-header \
 		--keep-one-line-statements --convert-tabs \
 		--indent-preprocessor "{}" \;
-	-find -regex ".*\(orig\)" -exec rm -v "{}" \;
