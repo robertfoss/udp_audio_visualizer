@@ -16,14 +16,17 @@ typedef uint8_t ret_code;
 #define UNUSED(x) (void)(x)
 
 #ifdef NDEBUG
-#  define debug(M, ...)
+#  define debug(M)
+#  define debugf(M, ...)
 #else
-#  define debug(M, ...) fprintf(stderr, "DEBUG %s:%d %s(): " M "\n", __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+#  define debug(M) fprintf(stderr, "DEBUG %s:%d %s(): " M "\n", __FILE__, __LINE__, __func__)
+#  define debugf(M, ...) fprintf(stderr, "DEBUG %s:%d %s(): " M "\n", __FILE__, __LINE__, __func__, ##__VA_ARGS__)
 #endif
 
 #define clean_errno() (errno == 0 ? "None" : strerror(errno))
 
-#define log_ass(M, ...) fprintf(stderr, "[ASSERT] %s:%d %s() " M "\n", __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+#define log_ass(M) fprintf(stderr, "[ASSERT] %s:%d %s() " M "\n", __FILE__, __LINE__, __func__)
+#define log_assf(M, ...) fprintf(stderr, "[ASSERT] %s:%d %s() " M "\n", __FILE__, __LINE__, __func__, ##__VA_ARGS__)
 
 #define log_err(M, ...) fprintf(stderr, "[ERROR] %s:%d %s() errno: %s " M "\n", __FILE__, __LINE__, __func__, clean_errno(), ##__VA_ARGS__)
 
@@ -40,7 +43,9 @@ typedef uint8_t ret_code;
 #define check_debug(A, M, ...) if(!(A)) { debug(M, ##__VA_ARGS__); errno=0; goto error; }
 
 #define STR(s) #s
-#define DIE(M, ...) log_ass(M, ##__VA_ARGS__); \
+#define DIE(M) log_ass(M); \
+    exit(1)
+#define DIEF(M, ...) log_ass(M, ##__VA_ARGS__); \
     exit(1)
 
 #define ASSERT(err) if(!(err)) {\
@@ -49,5 +54,3 @@ typedef uint8_t ret_code;
 
 
 #endif//UTIL_H
-
-
