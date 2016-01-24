@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <time.h>
 
 #include "audio_process.h"
 #include "udp_listener.h"
@@ -20,7 +21,7 @@ int main()
         sink_manager_list_t *list = sink_manager_get_list();
         for (int i = 0; i < list->nbr_sinks; i++) {
             unsigned char txt[] = "0A0A0A0A0A0A0A0A0A";
-            udp_sender_send(list->sinks[i], (uint8_t *) &txt);
+            udp_sender_send(list->sinks[i], (uint8_t *) txt);
         }
         nanosleep(&time_sleep, NULL);
         sink_manager_free_list(list);

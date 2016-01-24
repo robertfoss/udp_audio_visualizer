@@ -22,7 +22,7 @@ callgrind: debug
 
 tsan: debug
 tsan: CFLAGS+=-fsanitize=thread
-tsan: LDFLAGS+=-ltsan"
+tsan: LDFLAGS+=-ltsan
 
 asan: debug
 asan: CFLAGS+=-fsanitize=address
