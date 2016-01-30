@@ -12,6 +12,14 @@ typedef uint8_t ret_code;
 #define RET_ERR (ret_code) 1
 
 #define DIV_ROUND(top, bottom) ((top + bottom - 1) / (bottom))
+#define MAX(a,b) \
+({ __typeof__ (a) _a = (a); \
+   __typeof__ (b) _b = (b); \
+ _a > _b ? _a : _b; })
+#define MIN(a,b) \
+({ __typeof__ (a) _a = (a); \
+__typeof__ (b) _b = (b); \
+_a < _b ? _a : _b; })
 
 #define UNUSED(x) (void)(x)
 

@@ -13,12 +13,12 @@ static void *audio_process_thread(void *args)
 }
 
 
-void audio_process_add_samples(size_t nbr_samples, PULSEAUDIO_SAMPLE_TYPE *left_data, PULSEAUDIO_SAMPLE_TYPE *right_data)
+void audio_process_add_samples(size_t nbr_samples, PULSEAUDIO_SAMPLE_TYPE *data_left, PULSEAUDIO_SAMPLE_TYPE *data_right)
 {
+    UNUSED(nbr_samples);
 
-
-    free(left_data);
-    free(right_data);
+    free(data_left);
+    free(data_right);
 }
 
 

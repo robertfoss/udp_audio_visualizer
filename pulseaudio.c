@@ -9,13 +9,42 @@ static void stream_state_cb(pa_stream *s, void *mainloop);
 static void stream_success_cb(pa_stream *stream, int success, void *data);
 static void stream_read_cb(pa_stream *stream, size_t nbr_bytes, void *data);
 
+char *default_sink_monitor;
+pa_threaded_mainloop *mainloop;
+pa_mainloop_api *mainloop_api;
+pa_context *context;
+pa_stream *stream;
+
+void server_info_cb(pa_context* context, const pa_server_info *i, void *userdata) {
+    UNUSED(context);
+log_info("server_info_cb called%s", "");
+
+    pa_server_info *info = (pa_server_info *) userdata;
+    info->default_sink_name = i->default_sink_name;
+    info->default_source_name = i->default_source_name;
+
+    pa_threaded_mainloop_signal(mainloop, 0);
+}
+
+char * get_device_to_record(pa_context *context, pa_threaded_mainloop *mainloop) {
+log_info("get_device_to_record called%s", "");
+    pa_server_info info;
+    pa_operation *op = pa_context_get_server_info(context, server_info_cb, &info);
+    while (pa_operation_get_state(op) != PA_OPERATION_DONE) {
+log_info("get_device_to_record waiting, status: %d", pa_operation_get_state(op));
+        pa_threaded_mainloop_wait(mainloop);
+    }
+
+    const char *monitor = ".monitor";
+    size_t dev_monitor_strlen = strlen(info.default_sink_name) + strlen(monitor) + 1;
+    default_sink_monitor = realloc(default_sink_monitor, dev_monitor_strlen);
+    snprintf(default_sink_monitor, dev_monitor_strlen, "%s%s", info.default_sink_name, monitor);
+log_info("default_sink_monitor: %s", default_sink_monitor);
+    return default_sink_monitor;
+}
+
 
 ret_code pulseaudio_init() {
-    pa_threaded_mainloop *mainloop;
-    pa_mainloop_api *mainloop_api;
-    pa_context *context;
-    pa_stream *stream;
-
     // Get a mainloop and its context
     mainloop = pa_threaded_mainloop_new();
     ASSERT(mainloop);
@@ -69,7 +98,8 @@ ret_code pulseaudio_init() {
                    PA_STREAM_ADJUST_LATENCY;
 
     // Connect stream to the default audio output sink
-    ASSERT(pa_stream_connect_record(stream, NULL, &buffer_attr, stream_flags) == 0);
+    char *device = get_device_to_record(context, mainloop);
+    ASSERT(pa_stream_connect_record(stream, device, &buffer_attr, stream_flags) == 0);
 
     // Wait for the stream to be ready
     for (;;) {
@@ -122,7 +152,21 @@ static void stream_read_cb(pa_stream *stream, size_t nbr_bytes, void *data) {
         *ptr_data_left++  = *sample_buf++;
         *ptr_data_right++ = *sample_buf++;
     }
-log_info("copied %u bytes / %u samples", nbr_bytes, nbr_samples);
+log_info("copied  %u bytes / %u samples / %f ms", (uint32_t) nbr_bytes, (uint32_t) nbr_samples, (double) (nbr_samples*1000) / AUDIO_PROCESS_SAMPLE_RATE);
+log_info("ap_sample_rate: %u  ap_target_latency: %u  ap_ffts_per_sec: %u  pa_chunk_bytes: %u  pa_bufsize: %u",
+AUDIO_PROCESS_SAMPLE_RATE,
+AUDIO_PROCESS_TARGET_LATENCY,
+AUDIO_PROCESS_FFTS_PER_SEC,
+PULSEAUDIO_CHUNK_BYTES,
+PULSEAUDIO_BUFSIZE);
+printf("\nleft:  ");
+for(size_t i = 0; i < MIN(10, nbr_samples); i++) {
+    printf("%5d ", data_left[i]);
+}
+printf("\nright: ");
+for(size_t i = 0; i < MIN(10, nbr_samples); i++) {
+    printf("%5d ", data_right[i]);
+}
 
     ASSERT(stream);
     ASSERT(nbr_bytes > 0);
