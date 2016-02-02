@@ -79,10 +79,8 @@ ret_code pulseaudio_init() {
 
     // Recommended settings, i.e. server uses sensible values
     pa_buffer_attr buffer_attr;
-    buffer_attr.maxlength = PULSEAUDIO_BUFSIZE;
-    buffer_attr.tlength = (uint32_t) - 1;
-    buffer_attr.prebuf = (uint32_t) - 1;
-    buffer_attr.minreq = (uint32_t) - 1;
+    buffer_attr.maxlength = (uint32_t) PULSEAUDIO_BUFSIZE;
+    buffer_attr.fragsize  = (uint32_t) -1; // Let PA determine frag size
 
     pa_channel_map map;
     pa_channel_map_init_stereo(&map);
@@ -134,25 +132,28 @@ static void stream_state_cb(pa_stream *stream, void *mainloop) {
 
 static void stream_read_cb(pa_stream *stream, size_t nbr_bytes, void *data) {
     UNUSED(data);
-    const void *buf;
-    if (pa_stream_peek(stream, &buf, &nbr_bytes) < 0) {
+    PULSEAUDIO_SAMPLE_TYPE *sample_buf;
+    if (pa_stream_peek(stream, (void **) &sample_buf, &nbr_bytes) < 0) {
 
         DIE("pa_stream_peek() failed");
     }
-    PULSEAUDIO_SAMPLE_TYPE *sample_buf = (PULSEAUDIO_SAMPLE_TYPE *) buf;
     
-    PULSEAUDIO_SAMPLE_TYPE *data_left = malloc(DIV_ROUND(nbr_bytes, 2));
+    size_t channel_buf_size = DIV_ROUND(nbr_bytes, PULSEAUDIO_NBR_CHANNELS);
+    PULSEAUDIO_SAMPLE_TYPE *data_left = malloc(channel_buf_size);
     PULSEAUDIO_SAMPLE_TYPE *ptr_data_left = data_left;
 
-    PULSEAUDIO_SAMPLE_TYPE *data_right = malloc(DIV_ROUND(nbr_bytes, 2));
+    PULSEAUDIO_SAMPLE_TYPE *data_right = malloc(channel_buf_size);
     PULSEAUDIO_SAMPLE_TYPE *ptr_data_right = data_right;
 
-    size_t nbr_samples = DIV_ROUND(nbr_bytes, PULSEAUDIO_CHUNK_BYTES);
-    for(size_t i = 0; i < nbr_samples; i = i + 2) {
-        *ptr_data_left++  = *sample_buf++;
+    size_t nbr_samples = DIV_ROUND(nbr_bytes, PULSEAUDIO_SAMPLE_BYTES);
+    size_t nbr_chan_samples = DIV_ROUND(nbr_samples, PULSEAUDIO_NBR_CHANNELS);
+
+    for (size_t i = 0; i < nbr_chan_samples; i++) {
+        *ptr_data_left++ = *sample_buf++;
         *ptr_data_right++ = *sample_buf++;
     }
-log_info("copied  %u bytes / %u samples / %f ms", (uint32_t) nbr_bytes, (uint32_t) nbr_samples, (double) (nbr_samples*1000) / AUDIO_PROCESS_SAMPLE_RATE);
+
+log_info("copied  %u bytes / %u channel_buf_size / %u channel samples / %f ms", (uint32_t) nbr_bytes, (uint32_t) channel_buf_size, (uint32_t) nbr_chan_samples, (double) (nbr_chan_samples*1000) / AUDIO_PROCESS_SAMPLE_RATE);
 log_info("ap_sample_rate: %u  ap_target_latency: %u  ap_ffts_per_sec: %u  pa_chunk_bytes: %u  pa_bufsize: %u",
 AUDIO_PROCESS_SAMPLE_RATE,
 AUDIO_PROCESS_TARGET_LATENCY,
@@ -160,18 +161,19 @@ AUDIO_PROCESS_FFTS_PER_SEC,
 PULSEAUDIO_CHUNK_BYTES,
 PULSEAUDIO_BUFSIZE);
 printf("\nleft:  ");
-for(size_t i = 0; i < MIN(10, nbr_samples); i++) {
+for(size_t i = 0; i < MIN(10, nbr_chan_samples); i++) {
     printf("%5d ", data_left[i]);
 }
 printf("\nright: ");
-for(size_t i = 0; i < MIN(10, nbr_samples); i++) {
+for(size_t i = 0; i < MIN(10, nbr_chan_samples); i++) {
     printf("%5d ", data_right[i]);
 }
 
+    ASSERT((PULSEAUDIO_NBR_CHANNELS * nbr_chan_samples) == nbr_samples);
     ASSERT(stream);
     ASSERT(nbr_bytes > 0);
 
-    audio_process_add_samples(nbr_samples, (PULSEAUDIO_SAMPLE_TYPE *) data_left, (PULSEAUDIO_SAMPLE_TYPE *) data_right);
+    audio_process_add_samples((PULSEAUDIO_SAMPLE_TYPE *) data_left, (PULSEAUDIO_SAMPLE_TYPE *) data_right, nbr_chan_samples);
 
     // Pop that data that we peeked
     pa_stream_drop(stream);
