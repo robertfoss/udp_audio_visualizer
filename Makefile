@@ -1,7 +1,7 @@
 NAME = udp_audio_visualizer
 
 CC = gcc
-CFLAGS = -O3 -g3 -Wpedantic -Wextra -Wall --std=c11 -I./kiss_fft130
+CFLAGS = -O3 -g3 -Wpedantic -Wextra -Wall -D_POSIX_C_SOURCE=199309L --std=gnu11 -I./kiss_fft130
 LDFLAGS = -lpthread -lm -lpulse
 
 SRC = $(wildcard *.c) $(wildcard **/*.c)

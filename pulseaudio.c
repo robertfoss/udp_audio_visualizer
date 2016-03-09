@@ -133,7 +133,7 @@ static void stream_state_cb(pa_stream *stream, void *mainloop) {
 static void stream_read_cb(pa_stream *stream, size_t nbr_bytes, void *data) {
     UNUSED(data);
     PULSEAUDIO_SAMPLE_TYPE *sample_buf;
-    if (pa_stream_peek(stream, (void **) &sample_buf, &nbr_bytes) < 0) {
+    if (pa_stream_peek(stream, (const void **) &sample_buf, &nbr_bytes) < 0) {
 
         DIE("pa_stream_peek() failed");
     }
@@ -161,11 +161,11 @@ AUDIO_PROCESS_FFTS_PER_SEC,
 PULSEAUDIO_CHUNK_BYTES,
 PULSEAUDIO_BUFSIZE);
 printf("\nleft:  ");
-for(size_t i = 0; i < MIN(10, nbr_chan_samples); i++) {
+for(size_t i = 0; i < MIN((size_t) 10, nbr_chan_samples); i++) {
     printf("%5d ", data_left[i]);
 }
 printf("\nright: ");
-for(size_t i = 0; i < MIN(10, nbr_chan_samples); i++) {
+for(size_t i = 0; i < MIN((size_t) 10, nbr_chan_samples); i++) {
     printf("%5d ", data_right[i]);
 }
 
