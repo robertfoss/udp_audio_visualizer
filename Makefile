@@ -1,7 +1,8 @@
 NAME = udp_audio_visualizer
 
 CC = gcc
-CFLAGS = -O3 -g3 -Wpedantic -Wextra -Wall -D_POSIX_C_SOURCE=199309L --std=gnu11 -I./kiss_fft130
+CFLAGS = -O3 -g3 -Wpedantic -Wextra -Wall -D_GNU_SOURCE --std=gnu11 -I./kiss_fft130
+CFLAGS += -FIXED_POINT=16 #Set KISS_FFT to use int16_t
 LDFLAGS = -lpthread -lm -lpulse
 
 SRC = $(wildcard *.c) $(wildcard **/*.c)
@@ -14,26 +15,26 @@ $(NAME): $(OBJ)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 debug: clean $(NAME)
-debug: CFLAGS+=-g
+debug: CFLAGS += -g
 
 callgrind: debug
 	-timeout 15s valgrind --tool=callgrind ./$(NAME)
 	-kcachegrind
 
 tsan: debug
-tsan: CFLAGS+=-fsanitize=thread
-tsan: LDFLAGS+=-ltsan
+tsan: CFLAGS  += -fsanitize=thread
+tsan: LDFLAGS += -ltsan
 
 asan: debug
-asan: CFLAGS+=-fsanitize=address
-asan: LDFLAGS+=-fsanitize=address
+asan: CFLAGS  += -fsanitize=address
+asan: LDFLAGS += -fsanitize=address
 
 clean:
 	-rm -f $(OBJ) $(NAME)
-	-find . -name '*~' -exec rm -v "{}" \;
-	-find . -name '*.swp' -exec rm -v "{}" \;
+	-find . -name '*~'      -exec rm -v "{}" \;
+	-find . -name '*.swp'   -exec rm -v "{}" \;
 	-find . -name '*.out.*' -exec rm -v "{}" \;
-	-find . -name "*.orig" -exec rm -v "{}" \;
+	-find . -name "*.orig"  -exec rm -v "{}" \;
 
 format:
 	-find -regex ".*\.\(c\|h\)" -exec \

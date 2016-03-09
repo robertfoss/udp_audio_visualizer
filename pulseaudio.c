@@ -17,7 +17,7 @@ pa_stream *stream;
 
 void server_info_cb(pa_context* context, const pa_server_info *i, void *userdata) {
     UNUSED(context);
-log_info("server_info_cb called%s", "");
+log_info("server_info_cb called");
 
     pa_server_info *info = (pa_server_info *) userdata;
     info->default_sink_name = i->default_sink_name;
@@ -27,11 +27,11 @@ log_info("server_info_cb called%s", "");
 }
 
 char * get_device_to_record(pa_context *context, pa_threaded_mainloop *mainloop) {
-log_info("get_device_to_record called%s", "");
+log_info("get_device_to_record called");
     pa_server_info info;
     pa_operation *op = pa_context_get_server_info(context, server_info_cb, &info);
     while (pa_operation_get_state(op) != PA_OPERATION_DONE) {
-log_info("get_device_to_record waiting, status: %d", pa_operation_get_state(op));
+log_infof("get_device_to_record waiting, status: %d", pa_operation_get_state(op));
         pa_threaded_mainloop_wait(mainloop);
     }
 
@@ -39,7 +39,7 @@ log_info("get_device_to_record waiting, status: %d", pa_operation_get_state(op))
     size_t dev_monitor_strlen = strlen(info.default_sink_name) + strlen(monitor) + 1;
     default_sink_monitor = realloc(default_sink_monitor, dev_monitor_strlen);
     snprintf(default_sink_monitor, dev_monitor_strlen, "%s%s", info.default_sink_name, monitor);
-log_info("default_sink_monitor: %s", default_sink_monitor);
+log_infof("default_sink_monitor: %s", default_sink_monitor);
     return default_sink_monitor;
 }
 
@@ -153,21 +153,15 @@ static void stream_read_cb(pa_stream *stream, size_t nbr_bytes, void *data) {
         *ptr_data_right++ = *sample_buf++;
     }
 
-log_info("copied  %u bytes / %u channel_buf_size / %u channel samples / %f ms", (uint32_t) nbr_bytes, (uint32_t) channel_buf_size, (uint32_t) nbr_chan_samples, (double) (nbr_chan_samples*1000) / AUDIO_PROCESS_SAMPLE_RATE);
-log_info("ap_sample_rate: %u  ap_target_latency: %u  ap_ffts_per_sec: %u  pa_chunk_bytes: %u  pa_bufsize: %u",
+log_infof("copied  %u bytes / %u channel_buf_size / %u channel samples / %f ms", (uint32_t) nbr_bytes, (uint32_t) channel_buf_size, (uint32_t) nbr_chan_samples, (double) (nbr_chan_samples*1000) / AUDIO_PROCESS_SAMPLE_RATE);
+log_infof("ap_sample_rate: %u  ap_target_latency: %u  ap_ffts_per_sec: %u  pa_chunk_bytes: %u  pa_bufsize: %u",
 AUDIO_PROCESS_SAMPLE_RATE,
 AUDIO_PROCESS_TARGET_LATENCY,
 AUDIO_PROCESS_FFTS_PER_SEC,
 PULSEAUDIO_CHUNK_BYTES,
 PULSEAUDIO_BUFSIZE);
-printf("\nleft:  ");
-for(size_t i = 0; i < MIN((size_t) 10, nbr_chan_samples); i++) {
-    printf("%5d ", data_left[i]);
-}
-printf("\nright: ");
-for(size_t i = 0; i < MIN((size_t) 10, nbr_chan_samples); i++) {
-    printf("%5d ", data_right[i]);
-}
+log_infof("left:  %5d %5d %5d %5d %5d", data_left[0], data_left[1], data_left[2], data_left[3], data_left[4]);
+log_infof("right: %5d %5d %5d %5d %5d", data_right[0], data_right[1], data_right[2], data_right[3], data_right[4]);
 
     ASSERT((PULSEAUDIO_NBR_CHANNELS * nbr_chan_samples) == nbr_samples);
     ASSERT(stream);

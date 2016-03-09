@@ -22,14 +22,14 @@ static void print_sinks()
 
 static void add_sink(sink_t sink)
 {
-    log_info("Adding new sink: %s", inet_ntoa(sink.ip));
+    log_infof("Adding new sink: %s", inet_ntoa(sink.ip));
     pthread_mutex_lock(&w_mutex);
 
     if (list.nbr_sinks < list.nbr_sinks_allocated) {
         list.sinks[list.nbr_sinks++] = sink;
     } else {
         uint32_t new_sink_space = list.nbr_sinks_allocated * 2;
-        log_info("List of sinks is full, growing list to have space for %u entries.", new_sink_space);
+        log_infof("List of sinks is full, growing list to have space for %u entries.", new_sink_space);
         list.sinks = realloc(list.sinks, new_sink_space);
         if (list.sinks == NULL) {
             DIE("Unable to allocate more space for sinks");
