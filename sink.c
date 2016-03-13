@@ -28,7 +28,7 @@ static uint32_t sink_check(sink_t *sink)
 static void sink_print(sink_t *sink)
 {
     log_infof("Sink: port=%u nbr_leds=%u bytes_per_led=%u", sink->config.port, sink->config.nbr_leds,
-             sink->config.bytes_per_led);
+              sink->config.bytes_per_led);
 }
 
 uint32_t sink_initialize(sink_t *sink, ip_t ip, uint8_t *buf)

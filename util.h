@@ -17,13 +17,13 @@ typedef uint8_t ret_code;
 #undef MAX
 #endif
 #define MAX(a,b) \
-__extension__({ typeof (a) _a = (a), _b = (b); _a > _b ? _a : _b; })
+    __extension__({ typeof (a) _a = (a), _b = (b); _a > _b ? _a : _b; })
 
 #ifdef MIN
 #undef MIN
 #endif
 #define MIN(a,b) \
-__extension__({ typeof (a) _a = (a), _b = (b); _a < _b ? _a : _b; })
+    __extension__({ typeof (a) _a = (a), _b = (b); _a < _b ? _a : _b; })
 
 #define UNUSED(x) (void)(x)
 

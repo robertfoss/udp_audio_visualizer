@@ -21,6 +21,9 @@ callgrind: debug
 	-timeout 15s valgrind --tool=callgrind ./$(NAME)
 	-kcachegrind
 
+valgrind: debug
+	valgrind --leak-check=full ./$(NAME)
+
 tsan: debug
 tsan: CFLAGS  += -fsanitize=thread
 tsan: LDFLAGS += -ltsan

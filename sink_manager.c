@@ -7,8 +7,8 @@
 #include "util.h"
 
 
-sink_manager_list_t list;
-pthread_mutex_t     w_mutex;
+static sink_manager_list_t list;
+static pthread_mutex_t     w_mutex;
 
 
 static void print_sinks()

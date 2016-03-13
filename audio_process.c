@@ -38,7 +38,7 @@ static void buf_commit_read()
 {
     pthread_mutex_lock(&buf_mutex);
     buf_idx_read = (buf_idx_read + 1) % AUDIO_PROCESS_QUEUE_LEN;
-	buf_size--;
+    buf_size--;
     pthread_mutex_unlock(&buf_mutex);
 }
 
@@ -47,21 +47,21 @@ static void buf_add(stereo_samples_t samples)
 {
     pthread_mutex_lock(&buf_mutex);
 
-	if (buf_size <= 0)
-	{
-		buf_idx_write = 0;
-		buf_idx_read = 0;
-	}
+    if (buf_size <= 0)
+    {
+        buf_idx_write = 0;
+        buf_idx_read = 0;
+    }
 
-	if (buf_size >= AUDIO_PROCESS_QUEUE_LEN)
-	{
-		log_err("buffer full, rejected samples");
-		return;
-	}
+    if (buf_size >= AUDIO_PROCESS_QUEUE_LEN)
+    {
+        log_err("buffer full, rejected samples");
+        return;
+    }
 
     input_buf[buf_idx_write] = samples;
-	buf_commit_write();
-	
+    buf_commit_write();
+
     pthread_mutex_unlock(&buf_mutex);
 
     sem_post(&data_sem);
@@ -91,11 +91,17 @@ static stereo_samples_t *buf_pop()
 }
 
 
+static void audio_process_samples(stereo_samples_t *samples)
+{
+    return;
+}
+
+
 static void *audio_process_thread(void *args)
 {
     UNUSED(args);
 
-    while(1)
+    while (1)
     {
         sem_wait(&data_sem);
         log_infof("Sample received, sample buffers enqueued: %u", buf_size);
@@ -105,6 +111,8 @@ static void *audio_process_thread(void *args)
         {
             continue;
         }
+
+        audio_process_samples(samples);
 
         free(samples->l);
         free(samples->r);

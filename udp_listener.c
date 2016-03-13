@@ -54,6 +54,9 @@ static void *udp_listener_listen(void *args)
 void udp_listener_start()
 {
     debug();
+
+    sink_manager_init();
+
     pthread_t thread;
     if (pthread_create(&thread, NULL, &udp_listener_listen, NULL) != 0) {
         DIE("Failed to start thread");
