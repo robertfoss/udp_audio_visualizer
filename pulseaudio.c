@@ -1,8 +1,17 @@
 #include <stdio.h>
 #include <pulse/pulseaudio.h>
 
+#include "audio_process.h"
 #include "pulseaudio.h"
 
+
+//#define LOG_INFO 1
+//#define LOG_WARN 2
+//#define LOG_ERR  4
+//#ifndef LOG_LEVELS
+//#define LOG_LEVELS (LOG_INFO | LOG_WARN | LOG_ERR)
+#define LOG_LEVELS (LOG_WARN | LOG_ERR)
+#include "log.h"
 
 static void context_state_cb(pa_context* context, void* mainloop);
 static void stream_state_cb(pa_stream *s, void *mainloop);
@@ -85,7 +94,7 @@ ret_code pulseaudio_init() {
     pa_channel_map map;
     pa_channel_map_init_stereo(&map);
 
-    stream = pa_stream_new(context, "evesdrop", &sample_specifications, &map);
+    stream = pa_stream_new(context, "animation_listener", &sample_specifications, &map);
     pa_stream_set_state_callback(stream, stream_state_cb, mainloop);
     pa_stream_set_read_callback(stream, stream_read_cb, mainloop);
 
@@ -147,11 +156,10 @@ static void stream_read_cb(pa_stream *stream, size_t nbr_bytes, void *data) {
 
     size_t nbr_samples = DIV_ROUND(nbr_bytes, PULSEAUDIO_SAMPLE_BYTES);
     size_t nbr_chan_samples = DIV_ROUND(nbr_samples, PULSEAUDIO_NBR_CHANNELS);
-
     for (size_t i = 0; i < nbr_chan_samples; i++) {
         *ptr_data_left++ = *sample_buf++;
         *ptr_data_right++ = *sample_buf++;
-    }
+     }
 
     log_infof("copied  %u bytes / %u channel_buf_size / %u channel samples / %f ms", (uint32_t) nbr_bytes, (uint32_t) channel_buf_size, (uint32_t) nbr_chan_samples, (double)(nbr_chan_samples * 1000) / AUDIO_PROCESS_SAMPLE_RATE);
     log_infof("ap_sample_rate: %u  ap_target_latency: %u  ap_ffts_per_sec: %u  pa_chunk_bytes: %u  pa_bufsize: %u",

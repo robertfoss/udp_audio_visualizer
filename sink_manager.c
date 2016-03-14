@@ -6,6 +6,14 @@
 #include "sink_manager.h"
 #include "util.h"
 
+//#define LOG_INFO 1
+//#define LOG_WARN 2
+//#define LOG_ERR  4
+//#ifndef LOG_LEVELS
+//#define LOG_LEVELS (LOG_INFO | LOG_WARN | LOG_ERR)
+#define LOG_LEVELS (LOG_INFO | LOG_WARN | LOG_ERR)
+#include "log.h"
+
 
 static sink_manager_list_t list;
 static pthread_mutex_t     w_mutex;
@@ -14,7 +22,8 @@ static pthread_mutex_t     w_mutex;
 static void print_sinks()
 {
     printf("Alive sinks:\n");
-    for (int i = 0; i < list.nbr_sinks; i++) {
+    for (int i = 0; i < list.nbr_sinks; i++)
+    {
         printf("  %s\n", inet_ntoa(list.sinks[i].ip));
     }
 }
@@ -25,13 +34,17 @@ static void add_sink(sink_t sink)
     log_infof("Adding new sink: %s", inet_ntoa(sink.ip));
     pthread_mutex_lock(&w_mutex);
 
-    if (list.nbr_sinks < list.nbr_sinks_allocated) {
+    if (list.nbr_sinks < list.nbr_sinks_allocated)
+    {
         list.sinks[list.nbr_sinks++] = sink;
-    } else {
+    }
+    else
+    {
         uint32_t new_sink_space = list.nbr_sinks_allocated * 2;
         log_infof("List of sinks is full, growing list to have space for %u entries.", new_sink_space);
         list.sinks = realloc(list.sinks, new_sink_space);
-        if (list.sinks == NULL) {
+        if (list.sinks == NULL)
+        {
             DIE("Unable to allocate more space for sinks");
         }
         list.sinks[list.nbr_sinks++] = sink;
@@ -45,13 +58,15 @@ static void add_sink(sink_t sink)
 static void remove_sink(uint32_t idx)
 {
     pthread_mutex_lock(&w_mutex);
-    if (list.nbr_sinks <= 0) {
+    if (list.nbr_sinks <= 0)
+    {
         return;
     }
 
     uint32_t sinks_to_move = list.nbr_sinks - idx;
     list.nbr_sinks--;
-    if (sinks_to_move == 0) {
+    if (sinks_to_move == 0)
+    {
         return;
     }
 
@@ -67,8 +82,10 @@ static void purge_dead_sinks()
     struct timeval tv;
     gettimeofday(&tv, NULL);
 
-    for (int i = list.nbr_sinks; i >= 0; i--) {
-        if (tv.tv_sec - list.sinks[i].last_heartbeat > SINK_MANAGER_SINK_TIMEOUT) {
+    for (int i = list.nbr_sinks; i >= 0; i--)
+    {
+        if (tv.tv_sec - list.sinks[i].last_heartbeat > SINK_MANAGER_SINK_TIMEOUT)
+        {
             remove_sink(i);
         }
     }
@@ -126,6 +143,7 @@ void sink_manager_heartbeat(ip_t ip, uint8_t *buf)
 sink_manager_list_t *sink_manager_get_list()
 {
     pthread_mutex_lock(&w_mutex);
+    purge_dead_sinks();
     sink_manager_list_t *ret_list = (sink_manager_list_t *) malloc(sizeof(sink_manager_list_t));
     ASSERT(ret_list != NULL);
 

@@ -3,6 +3,14 @@
 #include "sink.h"
 #include "util.h"
 
+//#define LOG_INFO 1
+//#define LOG_WARN 2
+//#define LOG_ERR  4
+//#ifndef LOG_LEVELS
+//#define LOG_LEVELS (LOG_INFO | LOG_WARN | LOG_ERR)
+#define LOG_LEVELS (LOG_INFO | LOG_WARN | LOG_ERR)
+#include "log.h"
+
 
 static uint32_t sink_check(sink_t *sink)
 {
