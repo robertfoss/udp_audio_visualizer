@@ -2,7 +2,7 @@ NAME = udp_audio_visualizer
 
 CC = gcc
 CFLAGS = -O3 -g3 -Wpedantic -Wextra -Wall -D_GNU_SOURCE --std=gnu11 -I./kiss_fft130
-CFLAGS += -FIXED_POINT=16 #Set KISS_FFT to use int16_t
+CFLAGS += -DFIXED_POINT=16 #Set KISS_FFT to use int16_t
 LDFLAGS = -lpthread -lm -lpulse
 
 SRC = $(wildcard *.c) $(wildcard **/*.c)
