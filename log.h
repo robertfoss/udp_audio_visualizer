@@ -26,28 +26,28 @@
 
 #define clean_errno() (errno == 0 ? "None" : strerror(errno))
 
-#define log_ass(M) fprintf(stderr, "[ASSERT] %s:%d %s() " M "\n", __FILE__, __LINE__, __func__)
-#define log_assf(M, ...) fprintf(stderr, "[ASSERT] %s:%d %s() " M "\n", __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+#define log_ass(M) fprintf(stderr, "[ASSERT] %17s:%-4d %s() " M "\n", __FILE__, __LINE__, __func__)
+#define log_assf(M, ...) fprintf(stderr, "[ASSERT] %17s:%-4d %s() " M "\n", __FILE__, __LINE__, __func__, ##__VA_ARGS__)
 
 #if (LOG_LEVELS & LOG_ERR)
-#define log_err(M) fprintf(stderr, "[ERROR] %s:%d %s() errno: %s " M "\n", __FILE__, __LINE__, __func__, clean_errno())
-#define log_errf(M, ...) fprintf(stderr, "[ERROR] %s:%d %s() errno: %s " M "\n", __FILE__, __LINE__, __func__, clean_errno(), ##__VA_ARGS__)
+#define log_err(M) fprintf(stderr, "[ERROR] %17s:%-4d %s() errno: %s " M "\n", __FILE__, __LINE__, __func__, clean_errno())
+#define log_errf(M, ...) fprintf(stderr, "[ERROR] %17s:%-4d %s() errno: %s " M "\n", __FILE__, __LINE__, __func__, clean_errno(), ##__VA_ARGS__)
 #else
 #define log_err(M)
 #define log_err(M, ...)
 #endif
 
 #if (LOG_LEVELS & LOG_WARN)
-#define log_warn(M) fprintf(stderr, "[WARN] %s:%d %s() errno: %s " M "\n", __FILE__, __LINE__, __func__, clean_errno())
-#define log_warnf(M, ...) fprintf(stderr, "[WARN] %s:%d %s() errno: %s " M "\n", __FILE__, __LINE__, __func__, clean_errno(), ##__VA_ARGS__)
+#define log_warn(M) fprintf(stderr, "[WARN] %17s:%-4d %s() errno: %s " M "\n", __FILE__, __LINE__, __func__, clean_errno())
+#define log_warnf(M, ...) fprintf(stderr, "[WARN] %17s:%-4d %s() errno: %s " M "\n", __FILE__, __LINE__, __func__, clean_errno(), ##__VA_ARGS__)
 #else
 #define log_warn(M)
 #define log_warnf(M, ...)
 #endif
 
 #if (LOG_LEVELS & LOG_INFO)
-#define log_info(M) fprintf(stderr, "[INFO] %s:%d %s() " M "\n", __FILE__, __LINE__, __func__)
-#define log_infof(M, ...) fprintf(stderr, "[INFO] %s:%d %s() " M "\n", __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+#define log_info(M) fprintf(stderr, "[INFO] %17s:%-4d %-25s " M "\n", __FILE__, __LINE__, __func__)
+#define log_infof(M, ...) fprintf(stderr, "[INFO] %17s:%-4d %-25s " M "\n", __FILE__, __LINE__, __func__, ##__VA_ARGS__)
 #else
 #define log_info(M)
 #define log_infof(M, ...)

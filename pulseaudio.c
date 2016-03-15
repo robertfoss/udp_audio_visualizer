@@ -18,7 +18,6 @@ static void stream_state_cb(pa_stream *s, void *mainloop);
 static void stream_success_cb(pa_stream *stream, int success, void *data);
 static void stream_read_cb(pa_stream *stream, size_t nbr_bytes, void *data);
 
-char *default_sink_monitor;
 pa_threaded_mainloop *mainloop;
 pa_mainloop_api *mainloop_api;
 pa_context *context;
@@ -36,6 +35,8 @@ void server_info_cb(pa_context* context, const pa_server_info *i, void *userdata
 }
 
 char * get_device_to_record(pa_context *context, pa_threaded_mainloop *mainloop) {
+    static char default_sink_monitor[100];
+
     log_info("get_device_to_record called");
     pa_server_info info;
     pa_operation *op = pa_context_get_server_info(context, server_info_cb, &info);
@@ -46,7 +47,6 @@ char * get_device_to_record(pa_context *context, pa_threaded_mainloop *mainloop)
 
     const char *monitor = ".monitor";
     size_t dev_monitor_strlen = strlen(info.default_sink_name) + strlen(monitor) + 1;
-    default_sink_monitor = realloc(default_sink_monitor, dev_monitor_strlen);
     snprintf(default_sink_monitor, dev_monitor_strlen, "%s%s", info.default_sink_name, monitor);
     log_infof("default_sink_monitor: %s", default_sink_monitor);
     return default_sink_monitor;
@@ -156,7 +156,10 @@ static void stream_read_cb(pa_stream *stream, size_t nbr_bytes, void *data) {
 
     size_t nbr_samples = DIV_ROUND(nbr_bytes, PULSEAUDIO_SAMPLE_BYTES);
     size_t nbr_chan_samples = DIV_ROUND(nbr_samples, PULSEAUDIO_NBR_CHANNELS);
+//static int16_t ctr = 0x7FFF;
     for (size_t i = 0; i < nbr_chan_samples; i++) {
+//        *ptr_data_left++  = ctr;
+//        *ptr_data_right++ = ctr--;
         *ptr_data_left++ = *sample_buf++;
         *ptr_data_right++ = *sample_buf++;
      }

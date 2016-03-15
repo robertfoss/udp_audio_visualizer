@@ -25,6 +25,7 @@ void animate_process_add_fft(kiss_fft_cpx *l_fft, kiss_fft_cpx *r_fft)
     //TODO: Copy and store input fft, keep buffer of last 1 sec to allow for averages and musical analysis
     uint16_t intensity[AUDIO_PROCESS_FFT_BINS];
     animate_process_calc_intensity(intensity, l_fft);
+    animate_process_calc_intensity(intensity, r_fft);
     
     uint16_t max_val = 0;
     int max_idx = 0;
@@ -36,5 +37,5 @@ void animate_process_add_fft(kiss_fft_cpx *l_fft, kiss_fft_cpx *r_fft)
             max_idx = i;
         }
     }
-    log_infof("Loudest frequency: %u", animate_process_fft_bin_to_hz(max_idx));
+    log_infof("Loudest frequency: %u  intensity=%u (r=%d, i=%d)", animate_process_fft_bin_to_hz(max_idx), intensity[max_idx], r_fft[max_idx].r, r_fft[max_idx].i);
 }
