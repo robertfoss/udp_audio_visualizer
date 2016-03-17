@@ -178,9 +178,12 @@ void audio_process_start()
 
     pthread_mutexattr_t mutex_attr;
     pthread_mutexattr_init(&mutex_attr);
-    pthread_mutexattr_settype(&mutex_attr, PTHREAD_MUTEX_RECURSIVE);
-    pthread_mutex_init(&buf_mutex, &mutex_attr);
-
+    if (pthread_mutexattr_settype(&mutex_attr, PTHREAD_MUTEX_RECURSIVE) != 0) {
+        DIE("Unable to initialize mutex attr");
+    }
+    if (pthread_mutex_init(&buf_mutex, &mutex_attr) != 0) {
+        DIE("Unable to initialize mutex");
+    }
     pulseaudio_init();
 
     pthread_t thread;

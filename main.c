@@ -25,12 +25,15 @@ int main()
     time_sleep.tv_nsec = 5 * 10 * 1000 * 1000;
 
     while (1) {
+        sink_manager_print_sinks();
         sink_manager_list_t *list = sink_manager_get_list();
+
         for (int i = 0; i < list->nbr_sinks; i++) {
             unsigned char txt[] = "0A0A0A0A0A0A0A0A0A";
             udp_sender_send(list->sinks[i], (uint8_t *) txt);
         }
         nanosleep(&time_sleep, NULL);
+
         sink_manager_free_list(list);
     }
     debug();

@@ -22,6 +22,7 @@ void sink_manager_init();
 void sink_manager_heartbeat(ip_t ip, uint8_t *buf);
 sink_manager_list_t *sink_manager_get_list();
 void sink_manager_free_list(sink_manager_list_t *list);
+void sink_manager_print_sinks();
 
 
 #endif//SINK_MANAGER_H

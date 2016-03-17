@@ -8,24 +8,24 @@
 //#define LOG_ERR  4
 //#ifndef LOG_LEVELS
 //#define LOG_LEVELS (LOG_INFO | LOG_WARN | LOG_ERR)
-#define LOG_LEVELS (LOG_INFO | LOG_WARN | LOG_ERR)
+#define LOG_LEVELS (LOG_WARN | LOG_ERR)
 #include "log.h"
 
 
 static uint32_t sink_check(sink_t *sink)
 {
     if (sink->config.port == 0) {
-        log_infof("New sink has invalid port: %u", sink->config.port);
+        log_warnf("New sink has invalid port: %u", sink->config.port);
         return RET_ERR;
     }
 
     if (sink->config.nbr_leds > 10000) {
-        log_infof("New sink has too leds: %u", sink->config.nbr_leds);
+        log_warnf("New sink has too leds: %u", sink->config.nbr_leds);
         return RET_ERR;
     }
 
     if (sink->config.bytes_per_led > 8) {
-        log_infof("New sink has too many bytes per led: %u", sink->config.bytes_per_led);
+        log_warnf("New sink has too many bytes per led: %u", sink->config.bytes_per_led);
         return RET_ERR;
     }
 
@@ -35,8 +35,7 @@ static uint32_t sink_check(sink_t *sink)
 
 static void sink_print(sink_t *sink)
 {
-    log_infof("Sink: port=%u nbr_leds=%u bytes_per_led=%u", sink->config.port, sink->config.nbr_leds,
-              sink->config.bytes_per_led);
+    log_infof("Sink: port=%u nbr_leds=%u bytes_per_led=%u", sink->config.port, sink->config.nbr_leds, sink->config.bytes_per_led);
 }
 
 

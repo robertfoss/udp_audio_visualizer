@@ -19,13 +19,17 @@ static sink_manager_list_t list;
 static pthread_mutex_t     w_mutex;
 
 
-static void print_sinks()
+void sink_manager_print_sinks()
 {
     uint64_t now = util_time_now();
-    printf("Alive sinks:\n");
+
+    if (list.nbr_sinks > 0) {
+        log_info("Alive sinks:");
+    }
+
     for (int i = 0; i < list.nbr_sinks; i++)
     {
-        printf("  %s - last heartbeast %lu\n", inet_ntoa(list.sinks[i].ip), (now - list.sinks[i].last_heartbeat) / 1000);
+        log_infof("  %s - last heartbeast %lu\n", inet_ntoa(list.sinks[i].ip), (now - list.sinks[i].last_heartbeat) / 1000);
     }
 }
 
@@ -52,7 +56,7 @@ static void add_sink(sink_t sink)
     }
     pthread_mutex_unlock(&w_mutex);
 
-    print_sinks();
+    sink_manager_print_sinks();
 }
 
 
@@ -74,7 +78,7 @@ static void remove_sink(uint32_t idx)
     memmove(&(list.sinks[idx]), &(list.sinks[idx + 1]), sinks_to_move * sizeof(sink_t));
     pthread_mutex_unlock(&w_mutex);
 
-    print_sinks();
+    sink_manager_print_sinks();
 }
 
 
@@ -82,12 +86,13 @@ static void purge_dead_sinks()
 {
     uint64_t now = util_time_now();
 
-    for (int i = list.nbr_sinks; i >= 0; i--)
+    for (int i = 0; i < list.nbr_sinks; i++)
     {
+        log_infof("Sink #%d has been out of contact for %lu ms", i, (now - list.sinks[i].last_heartbeat) / 1000);
         if (now - list.sinks[i].last_heartbeat > (SINK_MANAGER_SINK_TIMEOUT * 1000))
         {
             remove_sink(i);
-            printf("  %s - timed out. Uncontacted for %lu\n", inet_ntoa(list.sinks[i].ip), (now - list.sinks[i].last_heartbeat) / 1000);
+            log_infof("  %s - timed out. Uncontacted for %lu ms\n", inet_ntoa(list.sinks[i].ip), (now - list.sinks[i].last_heartbeat) / 1000);
         }
     }
 }
@@ -116,7 +121,12 @@ void sink_manager_init()
         DIE("Malloc failed");
     }
 
-    if (pthread_mutex_init(&w_mutex, NULL) != 0) {
+    pthread_mutexattr_t mutex_attr;
+    pthread_mutexattr_init(&mutex_attr);
+    if (pthread_mutexattr_settype(&mutex_attr, PTHREAD_MUTEX_RECURSIVE) != 0) {
+        DIE("Unable to initialize mutex attr");
+    }
+    if (pthread_mutex_init(&w_mutex, &mutex_attr) != 0) {
         DIE("Unable to initialize mutex");
     }
 }
@@ -142,12 +152,14 @@ void sink_manager_heartbeat(ip_t ip, uint8_t *buf)
 sink_manager_list_t *sink_manager_get_list()
 {
     pthread_mutex_lock(&w_mutex);
+
     purge_dead_sinks();
     sink_manager_list_t *ret_list = (sink_manager_list_t *) malloc(sizeof(sink_manager_list_t));
     ASSERT(ret_list != NULL);
 
     *ret_list = list;
     ret_list->sinks = malloc(sizeof(sink_t) * list.nbr_sinks);
+
     ASSERT(ret_list->sinks);
     memcpy(ret_list->sinks, list.sinks, sizeof(sink_t) * list.nbr_sinks);
 

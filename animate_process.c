@@ -1,6 +1,13 @@
 #include "animate_process.h"
 #include "audio_process.h"
 #include "kiss_fft.h"
+
+//#define LOG_INFO 1
+//#define LOG_WARN 2
+//#define LOG_ERR  4
+//#ifndef LOG_LEVELS
+//#define LOG_LEVELS (LOG_INFO | LOG_WARN | LOG_ERR)
+#define LOG_LEVELS (LOG_WARN | LOG_ERR)
 #include "log.h"
 
 
