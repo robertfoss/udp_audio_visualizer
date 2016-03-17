@@ -21,10 +21,11 @@ static pthread_mutex_t     w_mutex;
 
 static void print_sinks()
 {
+    uint64_t now = util_time_now();
     printf("Alive sinks:\n");
     for (int i = 0; i < list.nbr_sinks; i++)
     {
-        printf("  %s\n", inet_ntoa(list.sinks[i].ip));
+        printf("  %s - last heartbeast %lu\n", inet_ntoa(list.sinks[i].ip), (now - list.sinks[i].last_heartbeat) / 1000);
     }
 }
 
@@ -83,9 +84,10 @@ static void purge_dead_sinks()
 
     for (int i = list.nbr_sinks; i >= 0; i--)
     {
-        if (now - list.sinks[i].last_heartbeat > SINK_MANAGER_SINK_TIMEOUT*1000)
+        if (now - list.sinks[i].last_heartbeat > (SINK_MANAGER_SINK_TIMEOUT * 1000))
         {
             remove_sink(i);
+            printf("  %s - timed out. Uncontacted for %lu\n", inet_ntoa(list.sinks[i].ip), (now - list.sinks[i].last_heartbeat) / 1000);
         }
     }
 }
