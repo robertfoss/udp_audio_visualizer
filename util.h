@@ -28,4 +28,8 @@ typedef uint8_t ret_code;
 #define UNUSED(x) (void)(x)
 
 
+/* Returns time in milliseconds. */
+uint64_t util_time_now();
+
+
 #endif//UTIL_H

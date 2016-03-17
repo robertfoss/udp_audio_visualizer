@@ -79,12 +79,11 @@ static void remove_sink(uint32_t idx)
 
 static void purge_dead_sinks()
 {
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
+    uint64_t now = util_time_now();
 
     for (int i = list.nbr_sinks; i >= 0; i--)
     {
-        if (tv.tv_sec - list.sinks[i].last_heartbeat > SINK_MANAGER_SINK_TIMEOUT)
+        if (now - list.sinks[i].last_heartbeat > SINK_MANAGER_SINK_TIMEOUT*1000)
         {
             remove_sink(i);
         }
@@ -124,17 +123,15 @@ void sink_manager_init()
 void sink_manager_heartbeat(ip_t ip, uint8_t *buf)
 {
     sink_t *sink = get_sink(ip);
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
 
     if (sink != NULL) {
-        sink->last_heartbeat = tv.tv_sec;
+        sink->last_heartbeat = util_time_now();
     } else {
         sink_t new_sink;
         if (sink_initialize(&new_sink, ip, buf) != RET_OK) {
             return;
         }
-        new_sink.last_heartbeat = tv.tv_sec;
+        new_sink.last_heartbeat = util_time_now();
         add_sink(new_sink);
     }
 }

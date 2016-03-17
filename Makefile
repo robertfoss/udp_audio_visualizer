@@ -1,7 +1,7 @@
 NAME = udp_audio_visualizer
 
 CC = gcc
-CFLAGS = -O3 -g3 -Wpedantic -Wextra -Wall -D_GNU_SOURCE --std=gnu11 -I./kiss_fft130
+CFLAGS = -O3 -g3 --std=c11 -Wpedantic -Wextra -Wall -D_GNU_SOURCE --std=gnu11 -I./kiss_fft130
 CFLAGS += -DFIXED_POINT=16 #Set KISS_FFT to use int16_t
 LDFLAGS = -lpthread -lm -lpulse
 
@@ -14,6 +14,9 @@ OBJ = $(SRC:.c=.o)
 $(NAME): $(OBJ)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
+run: $(NAME)
+	./$(NAME)
+
 debug: clean $(NAME)
 debug: CFLAGS += -g
 
@@ -22,7 +25,7 @@ callgrind: debug
 	-kcachegrind
 
 valgrind: debug
-	valgrind --leak-check=full ./$(NAME)
+	valgrind --tool=memcheck --leak-check=full ./$(NAME)
 
 tsan: debug
 tsan: CFLAGS  += -fsanitize=thread

@@ -87,13 +87,13 @@ static ret_code buf_last_samples(kiss_fft_cpx *l, kiss_fft_cpx *r)
     memset(l, 0, sizeof(kiss_fft_cpx) * AUDIO_PROCESS_FFT_BINS);
     memset(r, 0, sizeof(kiss_fft_cpx) * AUDIO_PROCESS_FFT_BINS);
 
-    for (int i = 0; i < buf_size && samples_found < AUDIO_PROCESS_FFT_BINS; i++)
+    for (int i = 0; i < (int32_t) buf_size && samples_found < AUDIO_PROCESS_FFT_BINS; i++)
     {
         stereo_samples_t *sample = buf_get_lifo(i);
         int samples_needed_from_buf = MIN(sample->len, AUDIO_PROCESS_FFT_BINS - samples_found);
         ASSERT(samples_needed_from_buf >= 0);
 
-        for (size_t j = 0; j < samples_needed_from_buf; j++)
+        for (size_t j = 0; j < (uint32_t) samples_needed_from_buf; j++)
         {
             int dst_idx = AUDIO_PROCESS_FFT_BINS - j - samples_found - 1;
             int src_idx = sample->len - j - 1;
@@ -101,7 +101,7 @@ static ret_code buf_last_samples(kiss_fft_cpx *l, kiss_fft_cpx *r)
             ASSERT(dst_idx >= 0);
             ASSERT(dst_idx < AUDIO_PROCESS_FFT_BINS);
             ASSERT(src_idx >= 0);
-            ASSERT(src_idx < (uint32_t) sample->len);
+            ASSERT(src_idx < (int32_t) sample->len);
 
             l[dst_idx].r = sample->l[src_idx];
             r[dst_idx].r = sample->r[src_idx];

@@ -17,9 +17,10 @@ typedef struct __attribute__((__packed__)) sink_config_t {
 
 
 typedef struct sink_t {
-    ip_t          ip;             // IP address of sink
-    uint32_t      last_heartbeat; // Timestamp of last heartbeat of sink
-    sink_config_t config;         // Specific configuration options this sink
+    ip_t          ip;              // IP address of sink
+    uint64_t      first_heartbeat; // Timestamp of first heartbeat of sink
+    uint64_t      last_heartbeat;  // Timestamp of last heartbeat of sink
+    sink_config_t config;          // Specific configuration options this sink
 } sink_t;
 
 

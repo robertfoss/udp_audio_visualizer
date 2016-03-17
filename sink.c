@@ -39,10 +39,12 @@ static void sink_print(sink_t *sink)
               sink->config.bytes_per_led);
 }
 
+
 uint32_t sink_initialize(sink_t *sink, ip_t ip, uint8_t *buf)
 {
     sink->config = *(sink_config_t *) buf;
     sink->ip = ip;
+    sink->first_heartbeat = util_time_now();
 
     if (sink_check(sink) != RET_OK) {
         return RET_ERR;
