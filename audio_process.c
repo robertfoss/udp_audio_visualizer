@@ -135,7 +135,7 @@ static void audio_process_samples()
 
     kiss_fft(fft_state_left,  l_fft_in, l_fft_out);
     kiss_fft(fft_state_right, r_fft_in, r_fft_out);
-    
+
     animate_process_add_fft(l_fft_out, r_fft_out);
 }
 

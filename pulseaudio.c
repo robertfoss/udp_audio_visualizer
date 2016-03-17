@@ -162,7 +162,7 @@ static void stream_read_cb(pa_stream *stream, size_t nbr_bytes, void *data) {
 //        *ptr_data_right++ = ctr--;
         *ptr_data_left++ = *sample_buf++;
         *ptr_data_right++ = *sample_buf++;
-     }
+    }
 
     log_infof("copied  %u bytes / %u channel_buf_size / %u channel samples / %f ms", (uint32_t) nbr_bytes, (uint32_t) channel_buf_size, (uint32_t) nbr_chan_samples, (double)(nbr_chan_samples * 1000) / AUDIO_PROCESS_SAMPLE_RATE);
     log_infof("ap_sample_rate: %u  ap_target_latency: %u  ap_ffts_per_sec: %u  pa_chunk_bytes: %u  pa_bufsize: %u",
