@@ -29,7 +29,7 @@ void sink_manager_print_sinks()
 
     for (int i = 0; i < list.nbr_sinks; i++)
     {
-        log_infof("  %s - last heartbeast %lu\n", inet_ntoa(list.sinks[i].ip), (now - list.sinks[i].last_heartbeat) / 1000);
+        log_infof("  %s - last heartbeast %lus ago", inet_ntoa(list.sinks[i].ip), (now - list.sinks[i].last_heartbeat) / 1000);
     }
 }
 
@@ -85,14 +85,20 @@ static void remove_sink(uint32_t idx)
 static void purge_dead_sinks()
 {
     uint64_t now = util_time_now();
+    uint8_t purged_sinks = 0;
 
     for (int i = 0; i < list.nbr_sinks; i++)
     {
-        log_infof("Sink #%d has been out of contact for %lu ms", i, (now - list.sinks[i].last_heartbeat) / 1000);
         if (now - list.sinks[i].last_heartbeat > (SINK_MANAGER_SINK_TIMEOUT * 1000))
         {
+            if (purged_sinks == 0)
+            {
+                log_info("Purge sinks:");
+            }
+
+            log_infof("  %s - timed out. Uncontacted for %lus", inet_ntoa(list.sinks[i].ip), (now - list.sinks[i].last_heartbeat) / 1000);
             remove_sink(i);
-            log_infof("  %s - timed out. Uncontacted for %lu ms\n", inet_ntoa(list.sinks[i].ip), (now - list.sinks[i].last_heartbeat) / 1000);
+            purged_sinks++;
         }
     }
 }
@@ -146,6 +152,8 @@ void sink_manager_heartbeat(ip_t ip, uint8_t *buf)
         new_sink.last_heartbeat = util_time_now();
         add_sink(new_sink);
     }
+    
+    purge_dead_sinks();
 }
 
 

@@ -7,8 +7,8 @@
 #include "sink.h"
 
 
-#define SINK_MANAGER_INIT_ALLOC_SINKS 10
-#define SINK_MANAGER_SINK_TIMEOUT 45
+#define SINK_MANAGER_INIT_ALLOC_SINKS  10
+#define SINK_MANAGER_SINK_TIMEOUT      45
 
 
 typedef struct sink_manager_list_t {
